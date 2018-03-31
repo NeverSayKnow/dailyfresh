@@ -637,6 +637,10 @@ html,body{height:100%}
 	font-family:'Microsoft Yahei'
 }
 
+.form_check{
+	margin:10px 0 10px 100px;
+}
+
 .stress{
 	color:#ff8800;
 }

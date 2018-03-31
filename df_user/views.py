@@ -20,6 +20,7 @@ def is_post(func):
         if request.method != 'POST':
             return JsonResponse({"code": 201, "message": '该请求不是post请求', "data": {}})
         return func(request)
+
     return is_post_inner
 
 
@@ -74,7 +75,6 @@ def login_handle(request):
         return JsonResponse({"code": 203, "message": '用户不存在', "data": {}})
     # 如果用户存在，创建跳转对象，若密码正确，接下来跳转到用户详情界面
     # response = HttpResponseRedirect('/user/user_center_info/')
-    data = {}
     is_remember = post.get('is_remember', '0')
     pwd = post.get('pwd')
 
@@ -85,12 +85,10 @@ def login_handle(request):
     if pwd_sha1 != user[0].user_pwd:
         return JsonResponse({"code": 204, "message": '密码输入错误，请重试', "data": {}})
 
-    # data['code'] = 200
-    # data["message"] = '登录成功'
-    # data["data"] = {"uid":user[0].pk}
-    response = JsonResponse({"code": 200, "message": '登录成功', "data": {"uid":user[0].pk}})
-
+    # 用户名密码输入成功
+    response = JsonResponse({"code": 200, "message": '登录成功', "data": {}})
     request.session['uname'] = post.get('username')  # 将用户名存进session中
+    request.session['uid'] = user[0].user_id  # 将用户id存进session中
     request.session.set_expiry(0)  # 关闭浏览器失效
     # 判断是否记住用户名
     if is_remember == '1':
@@ -99,8 +97,6 @@ def login_handle(request):
     else:
         response.set_cookie('user_name', user_name, max_age=-1)
 
-    # print('================')
-
     return response
 
 
@@ -108,10 +104,14 @@ def login_handle(request):
 def user_center_info(request):
     uname = request.session.get('uname', '')
     if uname == '':
-        # print('返回登录')
-        user_name = request.COOKIES.get('user_name', '')
         return redirect('/user/login/')  # 返回登录
-    return render(request, 'df_user/user_center_info.html', {"Title": "天天生鲜-用户中心"})
+    data = {}
+    user = User.objects.filter(user_name=uname)
+    data["user_phone"] = user[0].user_phone
+    data["user_email"] = user[0].user_email
+    data["Title"] = "天天生鲜-用户中心"
+    data["user_name"] = uname
+    return render(request, 'df_user/user_center_info.html', data)
 
 
 # 用户中心--全部订单
@@ -121,7 +121,60 @@ def user_center_order(request):
 
 # 用户中心--收货地址
 def user_center_address(request):
-    return render(request, 'df_user/user_center_site.html', {"Title": "天天生鲜-用户中心"})
+    addresses = DeliAddress.objects.filter(user_id=request.session.get('uid', 0))
+    return render(request, 'df_user/user_center_site.html', {"Title": "天天生鲜-用户中心","addresses": addresses})
 
 
+# 用户中心--添加收货地址
+@is_post
+def user_add_address(request):
+    uname = request.session.get('uname', '')
+    if uname == '':
+        return redirect('/user/login/')  # 返回登录
+    post = request.POST
+    # 创建地址对象
+    address = DeliAddress()
+    address.deli_name = post['deli_name']
+    address.deli_address = post['deli_address']
+    address.deli_postcode = post['deli_postcode']
+    address.deli_phone = post['deli_phone']
+    # 先判断该用户是否有收货地址,若没有就设置改地址为默认地址
+    addr = DeliAddress.objects.filter(user_id=request.session.get('uid', 0), is_default=True)
+    # print(len(addr))
+    if len(addr) == 0:
+        address.is_default = True
+    else:
+        # 若用户选择这是默认地址
+        if '1' == post.get('is_default', ''):  # html的checkbox没有选择的话不会传这个值过来，去个默认空字符串''
+            addr[0].is_default = False  # 把之前的默认地址设置为非默认地址
+            address.is_default = True  # 设置该地址为默认地址
+        else:
+            address.is_default = False
+    address.user_id = request.session.get('uid')
+    addr[0].save()  # 保存对这个地址的修改
+    address.save()  # 写进数据库
+    return JsonResponse({"code": 200, "message": '添加成功', "data": {}})
 
+
+# 用户中心--修改收货地址
+@is_post
+def user_modify_address(request):
+    post = request.POST
+    did = post['did']
+    address = DeliAddress.objects.filter(pk=did)
+    address[0].deli_name =post['deli_name']
+    address[0].deli_address = post['deli_address']
+    address[0].deli_postcode = post['deli_postcode']
+    address[0].deli_phone = post['deli_phone']
+    address[0].is_default = post['is_default']
+    address[0].save()  # 修改信息到数据库
+    return JsonResponse({"code": 200, "message": '修改成功', "data": {}})
+
+
+# 用户中心--删除收货地址
+def user_delete_address(request):
+    get = request.GET
+    did = get['did']
+    address = DeliAddress.objects.filter(pk=did)
+    address[0].delete()  # 删除该收货地址
+    return JsonResponse({"code": 200, "message": '删除成功', "data": {}})

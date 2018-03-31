@@ -1,5 +1,8 @@
 {% extends 'base_foot_search.html' %}
 
+{% block head %}
+    <script type="text/javascript" src="/static/js/user_address.js"></script>
+{% endblock %}
 {% block content %}
     <div class="main_con clearfix">
         <div class="left_menu_con clearfix">
@@ -14,31 +17,50 @@
             <h3 class="common_title2">收货地址</h3>
             <div class="site_con">
                 <dl>
-                    <dt>当前地址：</dt>
-                    <dd>北京市 海淀区 东北旺西路8号中关村软件园 （李思 收） 182****7528</dd>
+                    {% for address in addresses %}
+                        {% if address.is_default %}
+                            <dt>当前地址：</dt>
+                            <dd>{{ address.deli_address }}{{ address.deli_name }}{{ address.deli_phone }}&nbsp;&nbsp;&nbsp;&nbsp;
+                                <button>修改</button>&nbsp;&nbsp;<button>删除</button>
+                            </dd>
+                        {% endif %}
+                    {% endfor %}
+
+                    <dt>其他地址：</dt>
+                    {% for address in addresses %}
+                        {% if not address.is_default %}
+                            <dd>{{ address.deli_address }}{{ address.deli_name }}{{ address.deli_phone }}&nbsp;&nbsp;&nbsp;&nbsp;
+                                <button>修改</button>&nbsp;&nbsp;<button>删除</button>
+                            </dd>
+                        {% endif %}
+                    {% endfor %}
+
                 </dl>
             </div>
             <h3 class="common_title2">编辑地址</h3>
             <div class="site_con">
-                <form>
+                <form id="form_info">
+                    {% csrf_token %}
                     <div class="form_group">
                         <label>收件人：</label>
-                        <input type="text" name="">
+                        <input type="text" name="deli_name" id="deli_name">
                     </div>
                     <div class="form_group form_group2">
                         <label>详细地址：</label>
-                        <textarea class="site_area"></textarea>
+                        <textarea class="site_area" name="deli_address" id="deli_address"></textarea>
                     </div>
                     <div class="form_group">
                         <label>邮编：</label>
-                        <input type="text" name="">
+                        <input type="text" name="deli_postcode" id="deli_postcode">
                     </div>
                     <div class="form_group">
                         <label>手机：</label>
-                        <input type="text" name="">
+                        <input type="text" name="deli_phone" id="deli_phone">
                     </div>
 
-                    <input type="submit" name="" value="提交" class="info_submit">
+                    <div class="form_check"><input type="checkbox" name="is_default" value="1">是否设为默认地址</div>
+
+                    <input type="submit" name="" value="提交" class="info_submit" id="info_submit">
                 </form>
             </div>
         </div>

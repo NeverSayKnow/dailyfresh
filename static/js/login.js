@@ -2,6 +2,11 @@ $(function () {
 
     var name_is_null = true;
     var pwd_is_null = true;
+    var $name_input = $('.name_input');
+
+    var name = $.cookie('user_name'); //从cookie中获取user_name 若没这个cookie打log显示的undefined
+    console.log(name);
+    $name_input.attr({'value':name}); //设置到输入框中
 
     //判断名字是否为空
     function nameIsNull() {
@@ -15,7 +20,7 @@ $(function () {
     }
 
     // 获得焦点时隐藏提示
-    $('.name_input').focus(function () {
+    $name_input.focus(function () {
         $(this).next().hide();
     });
 

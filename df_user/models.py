@@ -19,6 +19,7 @@ class DeliAddress(models.Model):
     deli_address = models.CharField(max_length=80,default='')
     deli_postcode = models.CharField(max_length=6,default='')
     deli_phone = models.CharField(max_length=11,default='')
+    is_default = models.BooleanField(default=False)
     user_id = models.IntegerField()
 
     class Meta:
