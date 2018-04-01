@@ -16,12 +16,12 @@
         <div class="right_content clearfix">
             <h3 class="common_title2">收货地址</h3>
             <div class="site_con">
-                <dl>
+                <dl id="add_list">
                     {% for address in addresses %}
                         {% if address.is_default %}
                             <dt>当前地址：</dt>
-                            <dd>{{ address.deli_address }}{{ address.deli_name }}{{ address.deli_phone }}&nbsp;&nbsp;&nbsp;&nbsp;
-                                <button>修改</button>&nbsp;&nbsp;<button>删除</button>
+                            <dd >{{ address.deli_address }}{{ address.deli_name }}{{ address.deli_phone }}&nbsp;&nbsp;&nbsp;&nbsp;
+                                <button id="m{{ address.pk }}">修改</button>&nbsp;&nbsp;<button id="d{{ address.pk }}">删除</button>
                             </dd>
                         {% endif %}
                     {% endfor %}
@@ -30,7 +30,7 @@
                     {% for address in addresses %}
                         {% if not address.is_default %}
                             <dd>{{ address.deli_address }}{{ address.deli_name }}{{ address.deli_phone }}&nbsp;&nbsp;&nbsp;&nbsp;
-                                <button>修改</button>&nbsp;&nbsp;<button>删除</button>
+                                <button id="m{{ address.pk }}">修改</button>&nbsp;&nbsp;<button id="d{{ address.pk }}">删除</button>
                             </dd>
                         {% endif %}
                     {% endfor %}
@@ -58,7 +58,7 @@
                         <input type="text" name="deli_phone" id="deli_phone">
                     </div>
 
-                    <div class="form_check"><input type="checkbox" name="is_default" value="1">是否设为默认地址</div>
+                    <div class="form_check"><input type="checkbox" name="is_default" value="1" id="is_default">是否设为默认地址</div>
 
                     <input type="submit" name="" value="提交" class="info_submit" id="info_submit">
                 </form>

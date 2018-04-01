@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from .models import *
@@ -122,7 +123,7 @@ def user_center_order(request):
 # 用户中心--收货地址
 def user_center_address(request):
     addresses = DeliAddress.objects.filter(user_id=request.session.get('uid', 0))
-    return render(request, 'df_user/user_center_site.html', {"Title": "天天生鲜-用户中心","addresses": addresses})
+    return render(request, 'df_user/user_center_site.html', {"Title": "天天生鲜-用户中心", "addresses": addresses})
 
 
 # 用户中心--添加收货地址
@@ -139,42 +140,58 @@ def user_add_address(request):
     address.deli_postcode = post['deli_postcode']
     address.deli_phone = post['deli_phone']
     # 先判断该用户是否有收货地址,若没有就设置改地址为默认地址
-    addr = DeliAddress.objects.filter(user_id=request.session.get('uid', 0), is_default=True)
+    # addr = DeliAddress.objects.filter(user_id=request.session.get('uid', 0), is_default=True)
     # print(len(addr))
-    if len(addr) == 0:
-        address.is_default = True
-    else:
-        # 若用户选择这是默认地址
-        if '1' == post.get('is_default', ''):  # html的checkbox没有选择的话不会传这个值过来，去个默认空字符串''
-            addr[0].is_default = False  # 把之前的默认地址设置为非默认地址
-            address.is_default = True  # 设置该地址为默认地址
+    # if len(addr) == 0:
+    #     address.is_default = True
+    # else:
+    # 若用户选择这是默认地址
+    if '1' == post.get('is_default', ''):  # html的checkbox没有选择的话不会传这个值过来，没有取到设置个默认空字符串''
+        # 查看该用户是否有默认地址
+        addr = DeliAddress.objects.filter(user_id=request.session.get('uid', 0), is_default=True)
+        if len(addr) == 0:  # 没有默认地址
+            address.is_default = True
         else:
-            address.is_default = False
+            addr[0].is_default = False  # 把之前的默认地址设置为非默认地址
+            addr[0].save()  # 保存对之前默认地址的修改
+            address.is_default = True  # 设置该地址为默认地址
+    else:
+        address.is_default = False
     address.user_id = request.session.get('uid')
-    addr[0].save()  # 保存对这个地址的修改
     address.save()  # 写进数据库
-    return JsonResponse({"code": 200, "message": '添加成功', "data": {}})
+    return JsonResponse({"code": 200, "message": "添加成功", "data": {}})
 
 
 # 用户中心--修改收货地址
 @is_post
 def user_modify_address(request):
     post = request.POST
-    did = post['did']
-    address = DeliAddress.objects.filter(pk=did)
-    address[0].deli_name =post['deli_name']
-    address[0].deli_address = post['deli_address']
-    address[0].deli_postcode = post['deli_postcode']
-    address[0].deli_phone = post['deli_phone']
-    address[0].is_default = post['is_default']
-    address[0].save()  # 修改信息到数据库
-    return JsonResponse({"code": 200, "message": '修改成功', "data": {}})
+    mid = post['id']
+    print(mid)
+    address = DeliAddress.objects.get(pk=mid)
+    address.deli_name = post['deli_name']
+    address.deli_address = post['deli_address']
+    address.deli_postcode = post['deli_postcode']
+    address.deli_phone = post['deli_phone']
+    address.is_default = post['is_default']
+    address.save()  # 修改信息到数据库
+    return JsonResponse({"code": 200, "message": "修改成功", "data": {}})
 
 
 # 用户中心--删除收货地址
 def user_delete_address(request):
     get = request.GET
-    did = get['did']
+    did = get['id']
     address = DeliAddress.objects.filter(pk=did)
     address[0].delete()  # 删除该收货地址
-    return JsonResponse({"code": 200, "message": '删除成功', "data": {}})
+    return JsonResponse({"code": 200, "message": "删除成功", "data": {}})
+
+
+# 根据收货地址id获取该收货地址
+def user_get_one_address(request):
+    get = request.GET
+    gid = get['id']
+    address = DeliAddress.objects.filter(pk=gid).values('pk', 'deli_name', 'deli_address', 'deli_postcode', 'deli_phone',
+                                                       'is_default')
+    # print({"code": 200, "message": "OK", "data": list(address)})
+    return JsonResponse({"code": 200, "message": "OK", "data": list(address)})

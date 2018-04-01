@@ -11,6 +11,9 @@ urlpatterns = [
     path('user/user_center_order/', views.user_center_order, name='user_center_order'),
     path('user/user_center_address/', views.user_center_address, name='user_center_address'),
     path('user/user_center_address/add/', views.user_add_address, name='user_add_address'),
+    path('user/user_center_address/one/', views.user_get_one_address, name='user_get_one_address'),
+    path('user/user_center_address/delete/', views.user_delete_address, name='user_delete_address'),
+    path('user/user_center_address/modify/', views.user_modify_address, name='user_modify_address'),
 ]
 
 app_name = 'df_user'
