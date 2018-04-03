@@ -1,0 +1,93 @@
+{% extends 'base_foot_search.html' %}
+
+{% block content %}
+    <div class="navbar_con">
+        <div class="navbar clearfix">
+            <div class="subnav_con fl">
+                <h1>全部商品分类</h1>
+                <span></span>
+                <ul class="subnav">
+                    <li><a href="/goods/list1_0_1/" class="fruit">新鲜水果</a></li>
+                    <li><a href="/goods/list2_0_1/" class="seafood">海鲜水产</a></li>
+                    <li><a href="/goods/list3_0_1/" class="meet">猪牛羊肉</a></li>
+                    <li><a href="/goods/list4_0_1/" class="egg">禽类蛋品</a></li>
+                    <li><a href="/goods/list5_0_1/" class="vegetables">新鲜蔬菜</a></li>
+                    <li><a href="/goods/list6_0_1/" class="ice">速冻食品</a></li>
+                </ul>
+            </div>
+            <ul class="navlist fl">
+                <li><a href="{% url 'df_user:index' %}">首页</a></li>
+                <li class="interval">|</li>
+                <li><a href="#">手机生鲜</a></li>
+                <li class="interval">|</li>
+                <li><a href="#">抽奖</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="breadcrumb">
+        <a href="#">全部分类</a>
+        <span>></span>
+        <a href="#">新鲜水果</a>
+        <span>></span>
+        <a href="#">商品详情</a>
+    </div>
+
+    <div class="goods_detail_con clearfix">
+        {#		<div class="goods_detail_pic fl"><img src="/static/images/goods_detail.jpg"></div>#}
+        <div class="goods_detail_pic fl"><img src="{{ MEDIA_URL }}{{ goods.goods_pic }}"></div>
+
+        <div class="goods_detail_list fr">
+            <h3>{{ goods.goods_name }}</h3>
+            <p>{{ goods.goods_intro }}</p>
+            <div class="prize_bar">
+                <span class="show_pirze">¥<em>{{ goods.goods_price }}</em></span>
+                <span class="show_unit">单  位：{{ goods.goods_unit }}</span>
+            </div>
+            <div class="goods_num clearfix">
+                <div class="num_name fl">数 量：</div>
+                <div class="num_add fl">
+                    <input type="text" class="num_show fl" value="1">
+                    <a href="javascript:" class="add fr">+</a>
+                    <a href="javascript:" class="minus fr">-</a>
+                </div>
+            </div>
+            <div class="total">总价：<em>{{ goods.goods_price }}元</em></div>
+            <div class="operate_btn">
+                <a href="javascript:" class="buy_btn">立即购买</a>
+                <a href="javascript:" class="add_cart" id="add_cart">加入购物车</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main_wrap clearfix">
+        <div class="l_wrap fl clearfix">
+            <div class="new_goods">
+                <h3>新品推荐</h3>
+                <ul>
+                    {% for new in news %}
+                        <li>
+                            <a href="#"><img src="{{ MEDIA_URL }}{{ new.goods_pic }}"></a>
+                            <h4><a href="#">{{ new.goods_name }}</a></h4>
+                            <div class="prize">￥{{ new.goods_price }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="r_wrap fr clearfix">
+            <ul class="detail_tab clearfix">
+                <li class="active">商品介绍</li>
+                <li>评论</li>
+            </ul>
+
+            <div class="tab_content">
+                <dl>
+                    <dt>商品详情：</dt>
+                    <dd>{{ goods.goods_detail }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

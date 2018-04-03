@@ -19,4 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('df_user.urls', namespace='df_user')),
+    path('', include('df_goods.urls', namespace='df_goods')),
+    path('tinymce/', include('tinymce.urls')),  # 富文本编辑器
 ]

@@ -3,11 +3,30 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from .models import *
 from hashlib import sha1
+from df_goods.models import *
 
 
+# Tittle---每个页面的标题  has_cart---用来控制页面继承是否需要显示右边的我的购物车
 # 首页
 def index(request):
-    return render(request, 'df_user/index.html', {'Title': '天天生鲜-首页'})
+    goods = Goods.objects.all()
+    goods_1 = goods.filter(type_id=1).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    goods_2 = goods.filter(type_id=2).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    goods_3 = goods.filter(type_id=3).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    goods_4 = goods.filter(type_id=4).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    goods_5 = goods.filter(type_id=5).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    goods_6 = goods.filter(type_id=6).values('goods_id', 'goods_name', 'goods_price','goods_pic').order_by('-goods_id')[0:4]
+    data = {
+        "Title": '天天生鲜-首页',
+        "has_cart": 1,
+        "goods_1": goods_1,
+        "goods_2": goods_2,
+        "goods_3": goods_3,
+        "goods_4": goods_4,
+        "goods_5": goods_5,
+        "goods_6": goods_6
+    }
+    return render(request, 'df_user/index.html', data)
 
 
 # 用户注册
@@ -112,18 +131,20 @@ def user_center_info(request):
     data["user_email"] = user[0].user_email
     data["Title"] = "天天生鲜-用户中心"
     data["user_name"] = uname
+    data["has_cart"] = 0
     return render(request, 'df_user/user_center_info.html', data)
 
 
 # 用户中心--全部订单
 def user_center_order(request):
-    return render(request, 'df_user/user_center_order.html', {"Title": "天天生鲜-用户中心"})
+    return render(request, 'df_user/user_center_order.html', {"Title": "天天生鲜-用户中心", "has_cart": 0})
 
 
 # 用户中心--收货地址
 def user_center_address(request):
     addresses = DeliAddress.objects.filter(user_id=request.session.get('uid', 0))
-    return render(request, 'df_user/user_center_site.html', {"Title": "天天生鲜-用户中心", "addresses": addresses})
+    return render(request, 'df_user/user_center_site.html',
+                  {"Title": "天天生鲜-用户中心", "addresses": addresses, "has_cart": 0})
 
 
 # 用户中心--添加收货地址
@@ -191,7 +212,8 @@ def user_delete_address(request):
 def user_get_one_address(request):
     get = request.GET
     gid = get['id']
-    address = DeliAddress.objects.filter(pk=gid).values('pk', 'deli_name', 'deli_address', 'deli_postcode', 'deli_phone',
-                                                       'is_default')
+    address = DeliAddress.objects.filter(pk=gid).values('pk', 'deli_name', 'deli_address', 'deli_postcode',
+                                                        'deli_phone',
+                                                        'is_default')
     # print({"code": 200, "message": "OK", "data": list(address)})
     return JsonResponse({"code": 200, "message": "OK", "data": list(address)})
